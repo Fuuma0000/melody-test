@@ -95,8 +95,9 @@ func main() {
 			m.BroadcastOthers([]byte("set "+info.ID+" "+info.Name+" "+info.X+" "+info.Y), s)
 		} else if p[0] == "chat" {
 			fmt.Println(p)
-			text := p[1]
-			m.Broadcast([]byte("chat " + text))
+			name := p[1]
+			text := p[2]
+			m.Broadcast([]byte("chat " + name + " " + text))
 		}
 	})
 
