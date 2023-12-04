@@ -3,14 +3,14 @@
 
     <head>
         <meta charset="utf-8">
-        <title>goofy gophers</title>
+        <title>WebSocket test</title>
         <style>
             body {
                 cursor: none;
                 overflow: hidden;
             }
 
-            .gopher {
+            .user {
                 background-image: url("https://media.discordapp.net/attachments/471560982112632845/1181109109433581598/IMG_7581__1_-removebg-preview.png?ex=657fdc93&is=656d6793&hm=c5a605bd0cabb5222e2c163e2469581cf40354ec844ae33e28eca1fd59a9e794&=&width=462&height=468");
                 width: 200px;
                 height: 200px;
@@ -18,6 +18,16 @@
                 position: absolute;
                 left: 0px;
                 top: 0px;
+            }
+
+            .user-name {
+                position: absolute;
+                font-size: 16px;
+                font-weight: bold;
+                color: black;
+                text-align: center;
+                width: 200px;
+                top: -20px;
             }
 
             #chat {
@@ -33,16 +43,28 @@
     <body>
 
         <div id="count">現在の接続数: <span id="connectionCountDisplay">0</span></div>
+        <div>
+            <label for="name">名前:</label>
+            <input type="text" id="name">
+        </div>
         <div>Tabで入力フォームを選択、Enterで投稿</div>
         <div id="chat"></div>
         <script>
             connectionCount = 0;
             // window.location.hostは、現在のURLのホスト名とポート番号を返す
-            var url = "wss://" + window.location.host + "/wss";
+            var url = "ws://" + window.location.host + "/wss";
             // WebSocketオブジェクトを生成
             var ws = new WebSocket(url);
             // 自分のIDを保持する変数
             var myid = "";
+
+            var nameInput = document.getElementById("name");
+            var myName = ""; // フォームの値を格納する変数
+
+            nameInput.addEventListener("input", function (e) {
+                myName = e.target.value; // フォームに入力された値をname変数に代入
+            });
+
 
             // WebSocketのイベントハンドラを設定
             ws.onmessage = function (msg) {
@@ -64,9 +86,9 @@
             }
 
             // ゴーファーを配置する関数
-            function set(id, x, y) {
+            function set(id, name, x, y,) {
                 // idを指定して、ゴーファーのノードを取得する
-                var node = document.getElementById("gopher-" + id);
+                var node = document.getElementById("user-" + id);
                 // nodeが存在しない場合は、新しく作成する
                 if (!node) {
                     connectionCount++;
@@ -74,21 +96,30 @@
                     connectionCountDisplay.textContent = connectionCount;
                     node = document.createElement("div");
                     document.body.appendChild(node);
-                    node.className = "gopher";
+                    node.className = "user";
                     // ゴーファーのz-indexをIDに応じて設定する
                     node.style.zIndex = id + 1;
                     // ゴーファーのIDを設定する
-                    node.id = "gopher-" + id;
+                    node.id = "user-" + id;
+                    // ゴーファーの名前を設定する
+                    var nameNode = document.createElement("div");
+                    nameNode.className = "user-name";
+                    nameNode.textContent = name;
+                    node.appendChild(nameNode);
+                } else {
+                    nameNode = node.querySelector('.user-name');
                 }
                 // ゴーファーの位置を設定する
                 node.style.left = x + "px";
                 node.style.top = y + "px";
+                // 名前を設定する
+                nameNode.textContent = name;
             }
 
             // ゴーファーを削除する関数
             function dis(id) {
                 // idを指定して、ゴーファーのノードを取得する
-                var node = document.getElementById("gopher-" + id);
+                var node = document.getElementById("user-" + id);
                 // nodeが存在する場合は、削除する
                 if (node) {
                     connectionCount--;
@@ -109,15 +140,15 @@
             window.onmousemove = function (e) {
                 // 自分のIDが設定されている場合のみ、ゴーファーを配置する
                 if (myid !== "") {
-                    set(myid, e.pageX, e.pageY);
+                    set(myid, myName, e.pageX, e.pageY);
                     // サーバーにマウスの位置を送信する
-                    ws.send([e.pageX, e.pageY].join(" "));
+                    ws.send(["set", myName, e.pageX, e.pageY].join(" "));
                 }
             }
 
             function sendMessage() {
                 var input = document.getElementById("message");
-                ws.send(input.value);
+                ws.send("chat", input.value);
                 input.value = "";
             }
 
@@ -129,6 +160,7 @@
                     }
                 });
             });
+
         </script>
         <input type="text" id="message">
     </body>

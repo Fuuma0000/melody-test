@@ -10,7 +10,7 @@ import (
 
 // GopherInfoは、gopherの情報を表す構造体
 type GopherInfo struct {
-	ID, X, Y string
+	ID, Name, X, Y string
 }
 
 func main() {
@@ -46,14 +46,16 @@ func main() {
 			info := value.(*GopherInfo)
 
 			// すでに接続しているセッションに対して、新しく接続したセッションの情報を送信
-			s.Write([]byte("set " + info.ID + " " + info.X + " " + info.Y))
+			s.Write([]byte("set " + info.ID + " " + info.Name + " " + info.X + " " + info.Y))
 		}
 
-		// 新しく接続したセッションに対して、idを生成
+		// 新しく接続したセッションに対して、idEを生成
 		id := uuid.NewString()
 
-		// 新しく接続したセッションに対して、idを送信
-		s.Set("info", &GopherInfo{id, "0", "0"})
+		name := ""
+
+		// 新しく接続したセッションを登録
+		s.Set("info", &GopherInfo{id, name, "0", "0"})
 
 		// すべてのセッションに対して、新しく接続したセッションの情報を送信
 		s.Write([]byte("iam " + id))
@@ -81,20 +83,20 @@ func main() {
 		// 受信したメッセージをスペースで分割
 		p := strings.Split(string(msg), " ")
 
-		value, exists := s.Get("info")
+		value, _ := s.Get("info")
 
-		// もし受信したメッセージが2つでなければ、次の処理に移る
-		if len(p) >= 2 && exists {
+		// もし受信したメッセージが"set"で始まる場合は、
+		if p[0] == "set" {
 			info := value.(*GopherInfo)
-			info.X = p[0]
-			info.Y = p[1]
-
-			m.BroadcastOthers([]byte("set "+info.ID+" "+info.X+" "+info.Y), s)
-		} else {
+			info.Name = p[1]
+			info.X = p[2]
+			info.Y = p[3]
+			m.BroadcastOthers([]byte("set "+info.ID+" "+info.Name+" "+info.X+" "+info.Y), s)
+		} else if p[0] == "chat" {
 			m.Broadcast([]byte("chat " + string(msg)))
 		}
 	})
 
 	// 5000番ポートでサーバーを起動
-	http.ListenAndServe(":5000", nil)
+	http.ListenAndServe(":5001", nil)
 }
