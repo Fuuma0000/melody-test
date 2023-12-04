@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -93,7 +94,9 @@ func main() {
 			info.Y = p[3]
 			m.BroadcastOthers([]byte("set "+info.ID+" "+info.Name+" "+info.X+" "+info.Y), s)
 		} else if p[0] == "chat" {
-			m.Broadcast([]byte("chat " + string(msg)))
+			fmt.Println(p)
+			text := p[1]
+			m.Broadcast([]byte("chat " + text))
 		}
 	})
 

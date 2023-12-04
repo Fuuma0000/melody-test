@@ -131,6 +131,7 @@
 
             // チャットを表示する関数
             function chat(msg) {
+                console.log(msg);
                 var chatDiv = document.getElementById("chat");
                 chatDiv.innerHTML += msg + "<br>";
             }
@@ -149,7 +150,7 @@
             // メッセージを送信する関数
             function sendMessage() {
                 var input = document.getElementById("message");
-                ws.send("chat", input.value);
+                ws.send(["chat", input.value].join(" "));
                 input.value = "";
             }
 
