@@ -19,11 +19,24 @@
                 left: 0px;
                 top: 0px;
             }
+
+            #chat {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                background-color: white;
+                padding: 5px;
+            }
         </style>
     </head>
 
     <body>
+
+        <div id="count">現在の接続数: <span id="connectionCountDisplay">0</span></div>
+        <div>Tabで入力フォームを選択、Enterで投稿</div>
+        <div id="chat"></div>
         <script>
+            connectionCount = 0;
             // window.location.hostは、現在のURLのホスト名とポート番号を返す
             var url = "wss://" + window.location.host + "/wss";
             // WebSocketオブジェクトを生成
@@ -35,7 +48,7 @@
             ws.onmessage = function (msg) {
                 // メッセージを受信したときの処理
                 // メッセージはJSON形式なので、パースする
-                var cmds = { "iam": iam, "set": set, "dis": dis };
+                var cmds = { "iam": iam, "set": set, "dis": dis, "chat": chat };
                 if (msg.data) {
                     var parts = msg.data.split(" ")
                     var cmd = cmds[parts[0]];
@@ -56,6 +69,9 @@
                 var node = document.getElementById("gopher-" + id);
                 // nodeが存在しない場合は、新しく作成する
                 if (!node) {
+                    connectionCount++;
+                    var connectionCountDisplay = document.getElementById("connectionCountDisplay");
+                    connectionCountDisplay.textContent = connectionCount;
                     node = document.createElement("div");
                     document.body.appendChild(node);
                     node.className = "gopher";
@@ -75,9 +91,19 @@
                 var node = document.getElementById("gopher-" + id);
                 // nodeが存在する場合は、削除する
                 if (node) {
+                    connectionCount--;
+                    var connectionCountDisplay = document.getElementById("connectionCountDisplay");
+                    connectionCountDisplay.textContent = connectionCount;
                     document.body.removeChild(node);
                 }
             }
+
+            // チャットを表示する関数
+            function chat(msg) {
+                var chatDiv = document.getElementById("chat");
+                chatDiv.innerHTML += msg + "<br>";
+            }
+
 
             // マウス移動時の処理
             window.onmousemove = function (e) {
@@ -88,7 +114,23 @@
                     ws.send([e.pageX, e.pageY].join(" "));
                 }
             }
+
+            function sendMessage() {
+                var input = document.getElementById("message");
+                ws.send(input.value);
+                input.value = "";
+            }
+
+            window.addEventListener('load', function () {
+                // Attach keypress event listener once the document is fully loaded
+                document.getElementById("message").addEventListener("keypress", function (e) {
+                    if (e.key === "Enter") {
+                        sendMessage();
+                    }
+                });
+            });
         </script>
+        <input type="text" id="message">
     </body>
 
 </html>
