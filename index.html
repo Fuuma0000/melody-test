@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <head>
+        <meta charset="utf-8">
+        <title>goofy gophers</title>
+        <style>
+            body {
+                cursor: none;
+                overflow: hidden;
+            }
+
+            .gopher {
+                background-image: url("https://media.discordapp.net/attachments/471560982112632845/1181109109433581598/IMG_7581__1_-removebg-preview.png?ex=657fdc93&is=656d6793&hm=c5a605bd0cabb5222e2c163e2469581cf40354ec844ae33e28eca1fd59a9e794&=&width=462&height=468");
+                width: 200px;
+                height: 200px;
+                background-size: cover;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <script>
+            // window.location.hostは、現在のURLのホスト名とポート番号を返す
+            var url = "wss://" + window.location.host + "/wss";
+            // WebSocketオブジェクトを生成
+            var ws = new WebSocket(url);
+            // 自分のIDを保持する変数
+            var myid = "";
+
+            // WebSocketのイベントハンドラを設定
+            ws.onmessage = function (msg) {
+                // メッセージを受信したときの処理
+                // メッセージはJSON形式なので、パースする
+                var cmds = { "iam": iam, "set": set, "dis": dis };
+                if (msg.data) {
+                    var parts = msg.data.split(" ")
+                    var cmd = cmds[parts[0]];
+                    if (cmd) {
+                        cmd.apply(null, parts.slice(1));
+                    }
+                }
+            };
+
+            // 自分のIDを設定
+            function iam(id) {
+                myid = id;
+            }
+
+            // ゴーファーを配置する関数
+            function set(id, x, y) {
+                // idを指定して、ゴーファーのノードを取得する
+                var node = document.getElementById("gopher-" + id);
+                // nodeが存在しない場合は、新しく作成する
+                if (!node) {
+                    node = document.createElement("div");
+                    document.body.appendChild(node);
+                    node.className = "gopher";
+                    // ゴーファーのz-indexをIDに応じて設定する
+                    node.style.zIndex = id + 1;
+                    // ゴーファーのIDを設定する
+                    node.id = "gopher-" + id;
+                }
+                // ゴーファーの位置を設定する
+                node.style.left = x + "px";
+                node.style.top = y + "px";
+            }
+
+            // ゴーファーを削除する関数
+            function dis(id) {
+                // idを指定して、ゴーファーのノードを取得する
+                var node = document.getElementById("gopher-" + id);
+                // nodeが存在する場合は、削除する
+                if (node) {
+                    document.body.removeChild(node);
+                }
+            }
+
+            // マウス移動時の処理
+            window.onmousemove = function (e) {
+                // 自分のIDが設定されている場合のみ、ゴーファーを配置する
+                if (myid !== "") {
+                    set(myid, e.pageX, e.pageY);
+                    // サーバーにマウスの位置を送信する
+                    ws.send([e.pageX, e.pageY].join(" "));
+                }
+            }
+        </script>
+    </body>
+
+</html>
