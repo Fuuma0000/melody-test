@@ -85,9 +85,9 @@
                 myid = id;
             }
 
-            // ゴーファーを配置する関数
+            // ユーザを配置する関数
             function set(id, name, x, y,) {
-                // idを指定して、ゴーファーのノードを取得する
+                // idを指定して、ユーザのノードを取得する
                 var node = document.getElementById("user-" + id);
                 // nodeが存在しない場合は、新しく作成する
                 if (!node) {
@@ -97,11 +97,11 @@
                     node = document.createElement("div");
                     document.body.appendChild(node);
                     node.className = "user";
-                    // ゴーファーのz-indexをIDに応じて設定する
+                    // ユーザのz-indexをIDに応じて設定する
                     node.style.zIndex = id + 1;
-                    // ゴーファーのIDを設定する
+                    // ユーザのIDを設定する
                     node.id = "user-" + id;
-                    // ゴーファーの名前を設定する
+                    // ユーザの名前を設定する
                     var nameNode = document.createElement("div");
                     nameNode.className = "user-name";
                     nameNode.textContent = name;
@@ -109,16 +109,16 @@
                 } else {
                     nameNode = node.querySelector('.user-name');
                 }
-                // ゴーファーの位置を設定する
+                // ユーザの位置を設定する
                 node.style.left = x + "px";
                 node.style.top = y + "px";
                 // 名前を設定する
                 nameNode.textContent = name;
             }
 
-            // ゴーファーを削除する関数
+            // ユーザを削除する関数
             function dis(id) {
-                // idを指定して、ゴーファーのノードを取得する
+                // idを指定して、ユーザのノードを取得する
                 var node = document.getElementById("user-" + id);
                 // nodeが存在する場合は、削除する
                 if (node) {
@@ -138,7 +138,7 @@
 
             // マウス移動時の処理
             window.onmousemove = function (e) {
-                // 自分のIDが設定されている場合のみ、ゴーファーを配置する
+                // 自分のIDが設定されている場合のみ、ユーザを配置する
                 if (myid !== "") {
                     set(myid, myName, e.pageX, e.pageY);
                     // サーバーにマウスの位置を送信する
@@ -146,14 +146,15 @@
                 }
             }
 
+            // メッセージを送信する関数
             function sendMessage() {
                 var input = document.getElementById("message");
                 ws.send("chat", input.value);
                 input.value = "";
             }
 
+            // ロードした後にしないと、イベントハンドラが設定されない
             window.addEventListener('load', function () {
-                // Attach keypress event listener once the document is fully loaded
                 document.getElementById("message").addEventListener("keypress", function (e) {
                     if (e.key === "Enter") {
                         sendMessage();
