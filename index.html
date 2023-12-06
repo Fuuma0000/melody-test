@@ -41,7 +41,8 @@
     </head>
 
     <body>
-
+        <button onclick="createRoom()">ルームを作成する</button>
+        <button id="roomURL" onclick="copyRoomURL()">ルームのURLをコピーする</button>
         <div id="count">現在の接続数: <span id="connectionCountDisplay">0</span></div>
         <div>
             <label for="name">名前:</label>
@@ -51,10 +52,13 @@
         <div id="chat"></div>
         <script>
             connectionCount = 0;
-            // window.location.hostは、現在のURLのホスト名とポート番号を返す
-            var url = "ws://" + window.location.host + "/wss";
-            // WebSocketオブジェクトを生成
+            var urlParams = new URLSearchParams(window.location.search);
+            var room = urlParams.get('room');
+
+            // WebSocketのURLにルームIDを追加
+            var url = "wss://" + window.location.host + "/wss?room=" + room;
             var ws = new WebSocket(url);
+
             // 自分のIDを保持する変数
             var myid = "";
 
@@ -161,6 +165,36 @@
                     }
                 });
             });
+
+            // ルームを作成する関数
+            function createRoom() {
+                var roomName = prompt("ルーム名を入力してください:");
+                if (roomName) {
+                    // リンク先に飛ばす
+                    location.href = "ws?room=" + roomName;
+                }
+            }
+
+            // ルームのURLをコピーする関数
+            function copyRoomURL() {
+                if (!navigator.clipboard) {
+                    alert("このブラウザは対応していません");
+                    return;
+                }
+
+                // ルームのURLを取得する
+                pageUrl = location.href;
+
+                navigator.clipboard.writeText(pageUrl).then(
+                    () => {
+                        alert('文章をコピーしました。');
+                    }).catch(error => {
+                        alert('エラーが発生しました。');
+                    });
+            }
+
+
+
 
         </script>
         <input type="text" id="message">
