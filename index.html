@@ -11,9 +11,9 @@
             }
 
             .user {
-                background-image: url("https://media.discordapp.net/attachments/471560982112632845/1181109109433581598/IMG_7581__1_-removebg-preview.png?ex=657fdc93&is=656d6793&hm=c5a605bd0cabb5222e2c163e2469581cf40354ec844ae33e28eca1fd59a9e794&=&width=462&height=468");
-                width: 200px;
-                height: 200px;
+                background-image: url("https://cdn.discordapp.com/attachments/1095933862657405045/1182184252759085126/mitiru_chifoon-removebg-preview.png?ex=6583c5e1&is=657150e1&hm=420462956a06f53ea32394a9d8ee0b91ca7afd167bd1b6e41f9db4b026e0f55c&");
+                width: 100px;
+                height: 300px;
                 background-size: cover;
                 position: absolute;
                 left: 0px;
@@ -26,8 +26,13 @@
                 font-weight: bold;
                 color: black;
                 text-align: center;
-                width: 200px;
+                width: 100px;
+                /* 名前の幅を要素に合わせて調整 */
                 top: -20px;
+                left: 55%;
+                /* 要素の中央に配置 */
+                transform: translateX(-50%);
+                /* 中央揃え */
             }
 
             #chat {
@@ -53,10 +58,10 @@
         <script>
             connectionCount = 0;
             var urlParams = new URLSearchParams(window.location.search);
-            var room = urlParams.get('room');
+            var roomId = urlParams.get('id');
 
             // WebSocketのURLにルームIDを追加
-            var url = "wss://" + window.location.host + "/wss?room=" + room;
+            var url = "wss://" + window.location.host + "/wss?id=" + roomId;
             var ws = new WebSocket(url);
 
             // 自分のIDを保持する変数
@@ -171,7 +176,7 @@
                 var roomName = prompt("ルーム名を入力してください:");
                 if (roomName) {
                     // リンク先に飛ばす
-                    location.href = "ws?room=" + roomName;
+                    location.href = "room?id=" + roomName;
                 }
             }
 
@@ -192,9 +197,6 @@
                         alert('エラーが発生しました。');
                     });
             }
-
-
-
 
         </script>
         <input type="text" id="message">

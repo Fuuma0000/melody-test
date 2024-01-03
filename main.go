@@ -44,8 +44,8 @@ func main() {
 	// melodyのインスタンスを作成
 	m := melody.New()
 
-	// /wsにアクセスしたときにindex.htmlを返す
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	// /にアクセスしたときにindex.htmlを返す
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.html")
 	})
 
@@ -57,7 +57,7 @@ func main() {
 	// websocketの接続時の処理
 	m.HandleConnect(func(s *melody.Session) {
 		// URLから取得したルームID（この例ではクエリパラメータとして渡す）
-		roomID := s.Request.URL.Query().Get("room")
+		roomID := s.Request.URL.Query().Get("id")
 
 		// ルームが存在しない場合は新規作成
 		if _, ok := rooms[roomID]; !ok {
@@ -107,7 +107,7 @@ func main() {
 	// websocketの切断時の処理
 	m.HandleDisconnect(func(s *melody.Session) {
 		// URLから取得したルームID（この例ではクエリパラメータとして渡す）
-		roomID := s.Request.URL.Query().Get("room")
+		roomID := s.Request.URL.Query().Get("id")
 
 		// ルームからセッションを削除
 		delete(rooms[roomID]["users"], s)
@@ -129,7 +129,7 @@ func main() {
 
 	// websocketでメッセージを受信したときの処理
 	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		roomID := s.Request.URL.Query().Get("room")
+		roomID := s.Request.URL.Query().Get("id")
 
 		// メッセージを処理する
 		p := strings.Split(string(msg), " ")
@@ -164,5 +164,5 @@ func main() {
 	})
 
 	// 5000番ポートでサーバーを起動
-	http.ListenAndServe(":5000", nil)
+	http.ListenAndServe(":7030", nil)
 }
